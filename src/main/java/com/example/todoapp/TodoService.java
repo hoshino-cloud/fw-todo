@@ -4,7 +4,10 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class TodoService {
 
     private final TodoMapper todoMapper;
@@ -22,14 +25,20 @@ public class TodoService {
     }
 
     public int create(Todo todo) {
-        return todoMapper.insert(todo);
+        int result = todoMapper.insert(todo);
+        log.info("Todo created: id={}", todo.getId());
+        return result;
     }
 
     public int update(Todo todo) {
-        return todoMapper.update(todo);
+        int result = todoMapper.update(todo);
+        log.info("Todo updated: id={}", todo.getId());
+        return result;
     }
 
     public int delete(Long id) {
-        return todoMapper.deleteById(id);
+        int result = todoMapper.deleteById(id);
+        log.info("Todo deleted: id={}", id);
+        return result;
     }
 }
