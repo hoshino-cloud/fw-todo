@@ -13,17 +13,26 @@
 
         <nav class="calendar-navigation" aria-label="月の移動">
             <div class="calendar-navigation-months">
-                <a class="link" th:href="@{/calendar(year=${previousMonth.year}, month=${previousMonth.monthValue})}">前の月</a>
-                <a class="link" th:href="@{/calendar(year=${nextMonth.year}, month=${nextMonth.monthValue})}">次の月</a>
+                <th:block th:if="${weekView}">
+                    <a class="link" th:href="@{/calendar(view=week, date=${previousWeek})}">前の週</a>
+                    <a class="link" th:href="@{/calendar(view=week, date=${nextWeek})}">次の週</a>
+                </th:block>
+                <th:block th:unless="${weekView}">
+                    <a class="link" th:href="@{/calendar(year=${previousMonth.year}, month=${previousMonth.monthValue})}">前の月</a>
+                    <a class="link" th:href="@{/calendar(year=${nextMonth.year}, month=${nextMonth.monthValue})}">次の月</a>
+                </th:block>
             </div>
-            <h2 class="calendar-heading" th:text="${displayedMonth.year + '年' + displayedMonth.monthValue + '月'}">2026年4月</h2>
+            <h2 class="calendar-heading" th:if="${weekView}" th:text="${firstDay.monthValue + '月' + firstDay.dayOfMonth + '日 〜 ' + lastDay.monthValue + '月' + lastDay.dayOfMonth + '日'}">4月5日 〜 4月11日</h2>
+            <h2 class="calendar-heading" th:unless="${weekView}" th:text="${displayedMonth.year + '年' + displayedMonth.monthValue + '月'}">2026年4月</h2>
             <div class="calendar-navigation-actions">
+                <a class="link" th:if="${weekView}" th:href="@{/calendar(year=${firstDay.year}, month=${firstDay.monthValue})}">月表示</a>
+                <a class="link" th:unless="${weekView}" th:href="@{/calendar(view=week, date=${firstDay})}">週表示</a>
                 <a class="link" href="/todos">表で見る</a>
                 <a class="link" href="/todos/new">新規登録</a>
             </div>
         </nav>
 
-        <table class="calendar-table" th:attr="data-from=${firstDay}, data-to=${lastDay}">
+        <table class="calendar-table" th:classappend="${weekView} ? ' week-view'" th:attr="data-from=${firstDay}, data-to=${lastDay}, data-view=${weekView ? 'week' : 'month'}">
             <thead>
                 <tr>
                     <th scope="col">日</th>
@@ -71,7 +80,8 @@
                     return;
                 }
 
-                dayTodos.slice(0, 3).forEach((todo) => {
+                const todosToDisplay = calendar.dataset.view === 'week' ? dayTodos : dayTodos.slice(0, 3);
+                todosToDisplay.forEach((todo) => {
                     const todoTitle = document.createElement('a');
                     todoTitle.textContent = todo.title;
                     todoTitle.href = `/todos/${todo.id}/edit`;
@@ -83,7 +93,7 @@
                     dayCell.append(todoTitle);
                 });
 
-                if (dayTodos.length > 3) {
+                if (calendar.dataset.view !== 'week' && dayTodos.length > 3) {
                     const remainingCount = document.createElement('div');
                     remainingCount.textContent = `ほか ${dayTodos.length - 3}件`;
                     dayCell.append(remainingCount);

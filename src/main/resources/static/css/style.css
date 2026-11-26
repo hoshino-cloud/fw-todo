@@ -169,6 +169,10 @@ body {
     text-align: left;
 }
 
+.calendar-table.week-view td {
+    height: auto;
+}
+
 .calendar-empty {
     background: #f8fafc;
 }
