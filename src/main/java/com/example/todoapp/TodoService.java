@@ -25,6 +25,10 @@ public class TodoService {
         return todoMapper.search(keyword, category, order, null, null, includeCompleted, false);
     }
 
+    public List<Todo> search(String keyword, String category, String order, boolean includeCompleted, boolean trash) {
+        return todoMapper.search(keyword, category, order, null, null, includeCompleted, trash);
+    }
+
     public List<Todo> searchPage(String keyword, String category, String order, boolean includeCompleted,
             boolean trash, int pageSize, int page) {
         return todoMapper.searchPage(keyword, category, order, includeCompleted, trash, pageSize,

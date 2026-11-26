@@ -1,12 +1,14 @@
 package com.example.todoapp.api;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -45,6 +47,65 @@ public class TodoApiController {
         return todoService.search(keyword, category, order, from, to).stream()
                 .map(TodoDto::from)
                 .toList();
+    }
+
+    @GetMapping(value = "/api/todos.csv", produces = "text/csv")
+    public ResponseEntity<byte[]> todosCsv(
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "") String category,
+            @RequestParam(defaultValue = "asc") String order,
+            @RequestParam(defaultValue = "false") boolean includeCompleted,
+            @RequestParam(defaultValue = "false") boolean trash) {
+        if (!"desc".equals(order)) {
+            order = "asc";
+        }
+
+        StringBuilder csv = new StringBuilder("\uFEFF");
+        appendCsvRow(csv, "やること", "メモ", "ジャンル", "優先度", "期限", "状態");
+        todoService.search(keyword, category, order, includeCompleted, trash).stream()
+                .forEach(todo -> appendCsvRow(csv,
+                        todo.getTitle(),
+                        todo.getDetail(),
+                        todo.getCategory(),
+                        priorityLabel(todo.getPriority()),
+                        todo.getDueDate() == null ? "" : todo.getDueDate().toString(),
+                        Boolean.TRUE.equals(todo.getCompleted()) ? "完了" : "未完了"));
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"todos.csv\"")
+                .contentType(new MediaType("text", "csv", StandardCharsets.UTF_8))
+                .body(csv.toString().getBytes(StandardCharsets.UTF_8));
+    }
+
+    private void appendCsvRow(StringBuilder csv, String... values) {
+        for (int index = 0; index < values.length; index++) {
+            if (index > 0) {
+                csv.append(',');
+            }
+            csv.append('"')
+                    .append(escapeForSpreadsheet(values[index]))
+                    .append('"');
+        }
+        csv.append("\r\n");
+    }
+
+    private String escapeForSpreadsheet(String value) {
+        String safeValue = value == null ? "" : value;
+        if (safeValue.startsWith("=") || safeValue.startsWith("+")) {
+            safeValue = "'" + safeValue;
+        }
+        return safeValue.replace("\"", "\"\"");
+    }
+
+    private String priorityLabel(Integer priority) {
+        if (priority == null) {
+            return "";
+        }
+        return switch (priority) {
+            case 1 -> "高";
+            case 2 -> "中";
+            default -> "低";
+        };
     }
 
     @GetMapping("/api/todos/{id}")

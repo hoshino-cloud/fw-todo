@@ -36,6 +36,7 @@
             </form>
             <a class="link" th:href="@{/todos(keyword=${keyword}, category=${category}, order='asc', includeCompleted=${includeCompleted}, trash=${trash})}">期限が近い順</a>
             <a class="link" th:href="@{/todos(keyword=${keyword}, category=${category}, order='desc', includeCompleted=${includeCompleted}, trash=${trash})}">期限が遠い順</a>
+            <a class="link" th:href="@{/api/todos.csv(keyword=${keyword}, category=${category}, order=${order}, includeCompleted=${includeCompleted}, trash=${trash})}">CSVを書き出す</a>
         </div>
 
         <a class="btn" href="/todos/new">新規登録</a>
@@ -49,6 +50,7 @@
             <thead>
                 <tr>
                     <th>やること</th>
+                    <th>メモ</th>
                     <th>ジャンル</th>
                     <th>優先度</th>
                     <th>期限</th>
@@ -60,6 +62,7 @@
                 <tr th:each="todo : ${todos}"
                     th:classappend="${todo.dueDate != null and todo.dueDate.isBefore(T(java.time.LocalDate).now()) and !todo.completed} ? 'overdue' : ''">
                     <td th:text="${todo.title}">やること</td>
+                    <td th:text="${todo.detail}">メモ</td>
                     <td th:text="${todo.category}">ジャンル</td>
                     <td>
                         <span th:text="${todo.priority == 1 ? '高' : todo.priority == 2 ? '中' : '低'}">優先度</span>
