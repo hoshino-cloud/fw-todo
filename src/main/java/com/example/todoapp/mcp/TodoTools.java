@@ -1,8 +1,11 @@
 package com.example.todoapp.mcp;
 
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.ai.mcp.annotation.McpTool;
 import org.springframework.ai.mcp.annotation.McpToolParam;
@@ -38,6 +41,33 @@ public class TodoTools {
         return todoService.search(keyword, category, "asc", fromDate, toDate).stream()
                 .map(TodoDto::from)
                 .toList();
+    }
+
+    @McpTool(name = "summarize_week", description = "期間内のやることを一覧ではなく、件数・ジャンルごとの件数・未完了で期限が過ぎた件数に集計して返す")
+    public Map<String, Object> summarizeWeek(
+            @McpToolParam(required = false) String from,
+            @McpToolParam(required = false) String to) {
+        LocalDate fromDate = from == null ? null : LocalDate.parse(from);
+        LocalDate toDate = to == null ? null : LocalDate.parse(to);
+        if (fromDate != null && toDate != null && fromDate.isAfter(toDate)) {
+            throw new IllegalArgumentException("開始日は終了日以前にしてください");
+        }
+
+        List<Todo> todos = todoService.search(null, null, "asc", fromDate, toDate);
+        Map<String, Long> categoryCounts = todos.stream()
+                .collect(Collectors.groupingBy(Todo::getCategory, LinkedHashMap::new, Collectors.counting()));
+        long overdueCount = todos.stream()
+                .filter(todo -> !Boolean.TRUE.equals(todo.getCompleted()))
+                .map(Todo::getDueDate)
+                .filter(java.util.Objects::nonNull)
+                .filter(dueDate -> dueDate.isBefore(LocalDate.now()))
+                .count();
+
+        Map<String, Object> summary = new LinkedHashMap<>();
+        summary.put("totalCount", todos.size());
+        summary.put("categoryCounts", categoryCounts);
+        summary.put("overdueCount", overdueCount);
+        return summary;
     }
 
     @McpTool(name = "get_todo", description = "やることを1件返す")
