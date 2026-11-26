@@ -27,6 +27,7 @@
 | `completed` | 完了状態 | `BOOLEAN` | いいえ | `FALSE` | `FALSE`（0）=未完了、`TRUE`（1）=完了。 |
 | `created_at` | 登録日時 | `DATETIME` | いいえ | 登録時の現在日時 | MySQLが自動で設定する。 |
 | `updated_at` | 更新日時 | `DATETIME` | いいえ | 登録時の現在日時 | MySQLが登録時と更新時に自動で設定する。 |
+| `deleted_at` | 削除日時 | `DATETIME` | はい | `NULL` | `NULL` は通常表示、日時が入っている行は削除済みとして扱う。 |
 
 ## 4. 要件と列の対応
 
@@ -60,6 +61,7 @@ CREATE TABLE todos (
     completed BOOLEAN NOT NULL DEFAULT FALSE,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at DATETIME NULL,
 
     CONSTRAINT pk_todos PRIMARY KEY (id),
     CONSTRAINT chk_todos_category CHECK (

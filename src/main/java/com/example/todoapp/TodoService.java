@@ -22,21 +22,21 @@ public class TodoService {
     }
 
     public List<Todo> search(String keyword, String category, String order, boolean includeCompleted) {
-        return todoMapper.search(keyword, category, order, null, null, includeCompleted);
+        return todoMapper.search(keyword, category, order, null, null, includeCompleted, false);
     }
 
     public List<Todo> searchPage(String keyword, String category, String order, boolean includeCompleted,
-            int pageSize, int page) {
-        return todoMapper.searchPage(keyword, category, order, includeCompleted, pageSize,
+            boolean trash, int pageSize, int page) {
+        return todoMapper.searchPage(keyword, category, order, includeCompleted, trash, pageSize,
                 (page - 1) * pageSize);
     }
 
-    public int count(String keyword, String category, boolean includeCompleted) {
-        return todoMapper.count(keyword, category, includeCompleted);
+    public int count(String keyword, String category, boolean includeCompleted, boolean trash) {
+        return todoMapper.count(keyword, category, includeCompleted, trash);
     }
 
     public List<Todo> search(String keyword, String category, String order, LocalDate from, LocalDate to) {
-        return todoMapper.search(keyword, category, order, from, to, null);
+        return todoMapper.search(keyword, category, order, from, to, null, false);
     }
 
     public Todo findById(Long id) {
@@ -56,8 +56,14 @@ public class TodoService {
     }
 
     public int delete(Long id) {
-        int result = todoMapper.deleteById(id);
+        int result = todoMapper.markDeletedById(id);
         log.info("Todo deleted: id={}", id);
+        return result;
+    }
+
+    public int restore(Long id) {
+        int result = todoMapper.restoreById(id);
+        log.info("Todo restored: id={}", id);
         return result;
     }
 }

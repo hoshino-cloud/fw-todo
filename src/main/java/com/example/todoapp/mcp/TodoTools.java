@@ -42,7 +42,7 @@ public class TodoTools {
 
     @McpTool(name = "get_todo", description = "やることを1件返す")
     public TodoDto getTodo(@McpToolParam(required = true) Long id) {
-        return TodoDto.from(todoService.findById(id));
+        return TodoDto.from(requireTodo(id));
     }
 
     @McpTool(name = "add_todo", description = "やることを1件足す")
