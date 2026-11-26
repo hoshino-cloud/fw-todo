@@ -42,6 +42,15 @@ body {
     font-weight: bold;
 }
 
+.todo-table tr.overdue td {
+    background: #fee2e2;
+}
+
+.priority-high-marker {
+    margin-left: 4px;
+    color: #B91C1C;
+}
+
 .flash {
     margin: 0 0 16px;
     border: 1px solid #cbd5e1;
@@ -162,4 +171,21 @@ body {
 
 .calendar-empty {
     background: #f8fafc;
+}
+
+.pagination {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.pagination a {
+    border: 1px solid #999;
+    padding: 4px 9px;
+    text-decoration: none;
+}
+
+.pagination a.current {
+    background: #333;
+    color: #fff;
 }

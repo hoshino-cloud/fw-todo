@@ -10,7 +10,15 @@ import org.apache.ibatis.annotations.Param;
 public interface TodoMapper {
 
     List<Todo> search(@Param("keyword") String keyword, @Param("category") String category,
-            @Param("order") String order, @Param("from") LocalDate from, @Param("to") LocalDate to);
+            @Param("order") String order, @Param("from") LocalDate from, @Param("to") LocalDate to,
+            @Param("includeCompleted") Boolean includeCompleted);
+
+    List<Todo> searchPage(@Param("keyword") String keyword, @Param("category") String category,
+            @Param("order") String order, @Param("includeCompleted") boolean includeCompleted,
+            @Param("limit") int limit, @Param("offset") int offset);
+
+    int count(@Param("keyword") String keyword, @Param("category") String category,
+            @Param("includeCompleted") boolean includeCompleted);
 
     Todo findById(@Param("id") Long id);
 

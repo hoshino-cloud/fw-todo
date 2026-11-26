@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>やること一覧</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/style.css?v=overdue">
 </head>
 
 <body>
@@ -16,6 +16,7 @@
         <div class="search-bar">
             <form action="/todos" method="get">
                 <input type="hidden" name="order" th:value="${order}">
+                <input type="hidden" name="page" value="1">
                 <label for="keyword">やること</label>
                 <input id="keyword" type="text" name="keyword" th:value="${keyword}">
                 <label for="category">ジャンル</label>
@@ -27,10 +28,13 @@
                     <option value="資格" th:selected="${category == '資格'}">資格</option>
                     <option value="就職活動" th:selected="${category == '就職活動'}">就職活動</option>
                 </select>
+                <input id="includeCompleted" type="checkbox" name="includeCompleted" value="true"
+                    th:checked="${includeCompleted}">
+                <label for="includeCompleted">完了したものも表示する</label>
                 <button class="btn" type="submit">絞り込む</button>
             </form>
-            <a class="link" th:href="@{/todos(keyword=${keyword}, category=${category}, order='asc')}">期限が近い順</a>
-            <a class="link" th:href="@{/todos(keyword=${keyword}, category=${category}, order='desc')}">期限が遠い順</a>
+            <a class="link" th:href="@{/todos(keyword=${keyword}, category=${category}, order='asc', includeCompleted=${includeCompleted})}">期限が近い順</a>
+            <a class="link" th:href="@{/todos(keyword=${keyword}, category=${category}, order='desc', includeCompleted=${includeCompleted})}">期限が遠い順</a>
         </div>
 
         <a class="btn" href="/todos/new">新規登録</a>
@@ -50,16 +54,25 @@
                 </tr>
             </thead>
             <tbody>
-                <tr th:each="todo : ${todos}">
+                <tr th:each="todo : ${todos}"
+                    th:classappend="${todo.dueDate != null and todo.dueDate.isBefore(T(java.time.LocalDate).now()) and !todo.completed} ? 'overdue' : ''">
                     <td th:text="${todo.title}">やること</td>
                     <td th:text="${todo.category}">ジャンル</td>
-                    <td th:text="${todo.priority == 1 ? '高' : todo.priority == 2 ? '中' : '低'}">優先度</td>
+                    <td>
+                        <span th:text="${todo.priority == 1 ? '高' : todo.priority == 2 ? '中' : '低'}">優先度</span>
+                        <span class="priority-high-marker" th:if="${todo.priority == 1}" aria-label="最優先">★</span>
+                    </td>
                     <td th:text="${todo.dueDate}">期限</td>
                     <td th:text="${todo.completed ? '完了' : '未完了'}">状態</td>
                     <td><a class="link" th:href="@{/todos/{id}/edit(id=${todo.id})}">編集</a> <a class="link" th:href="@{/todos/{id}/delete(id=${todo.id})}">削除</a></td>
                 </tr>
             </tbody>
         </table>
+        <nav class="pagination" th:if="${totalPages > 1}" aria-label="ページ番号">
+            <a th:each="pageNumber : ${#numbers.sequence(1, totalPages)}"
+                th:href="@{/todos(keyword=${keyword}, category=${category}, order=${order}, includeCompleted=${includeCompleted}, page=${pageNumber})}"
+                th:text="${pageNumber}" th:classappend="${pageNumber == page} ? 'current' : ''">1</a>
+        </nav>
     </main>
 </body>
 

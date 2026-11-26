@@ -13,6 +13,9 @@
             <if test="category != null and category != ''">
                 AND category = #{category}
             </if>
+            <if test="includeCompleted != null and !includeCompleted">
+                AND completed = FALSE
+            </if>
             <if test="from != null">
                 AND due_date &gt;= #{from}
             </if>
@@ -35,6 +38,47 @@
         SELECT id, title, detail, category, priority, due_date, completed, created_at, updated_at
         FROM todos
         WHERE id = #{id}
+    </select>
+    <select id="searchPage" resultType="com.example.todoapp.Todo">
+        SELECT id, title, detail, category, priority, due_date, completed, created_at, updated_at
+        FROM todos
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="category != null and category != ''">
+                AND category = #{category}
+            </if>
+            <if test="!includeCompleted">
+                AND completed = FALSE
+            </if>
+        </where>
+        ORDER BY CASE WHEN due_date IS NULL THEN 1 ELSE 0 END
+        <choose>
+        <when test="order == 'desc'">ASC,</when>
+        <otherwise>DESC,</otherwise>
+        </choose>
+        <choose>
+        <when test="order == 'desc'">due_date DESC,</when>
+        <otherwise>due_date ASC,</otherwise>
+        </choose>
+        id ASC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+    <select id="count" resultType="int">
+        SELECT COUNT(*)
+        FROM todos
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="category != null and category != ''">
+                AND category = #{category}
+            </if>
+            <if test="!includeCompleted">
+                AND completed = FALSE
+            </if>
+        </where>
     </select>
     <insert id="insert" parameterType="com.example.todoapp.Todo" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO todos (title, detail, category, priority, due_date, completed)

@@ -15,6 +15,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class HomeController {
 
+    private static final int PAGE_SIZE = 10;
+
     private final TodoService todoService;
 
     public HomeController(TodoService todoService) {
@@ -32,14 +34,22 @@ public class HomeController {
             @RequestParam(defaultValue = "") String keyword,
             @RequestParam(defaultValue = "") String category,
             @RequestParam(defaultValue = "asc") String order,
+            @RequestParam(defaultValue = "false") boolean includeCompleted,
+            @RequestParam(defaultValue = "1") int page,
             Model model) {
         if (!"desc".equals(order)) {
             order = "asc";
         }
-        model.addAttribute("todos", todoService.search(keyword, category, order));
+        int totalPages = Math.max(1, (int) Math.ceil((double) todoService.count(keyword, category, includeCompleted)
+                / PAGE_SIZE));
+        page = Math.max(1, Math.min(page, totalPages));
+        model.addAttribute("todos", todoService.searchPage(keyword, category, order, includeCompleted, PAGE_SIZE, page));
         model.addAttribute("keyword", keyword);
         model.addAttribute("category", category);
         model.addAttribute("order", order);
+        model.addAttribute("includeCompleted", includeCompleted);
+        model.addAttribute("page", page);
+        model.addAttribute("totalPages", totalPages);
         return "todos";
     }
 
