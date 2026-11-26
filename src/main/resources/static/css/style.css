@@ -173,6 +173,12 @@ body {
     background: #f8fafc;
 }
 
+.weather {
+    margin-top: 4px;
+    color: #475569;
+    font-size: 13px;
+}
+
 .pagination {
     display: flex;
     gap: 8px;
